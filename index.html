@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Founder Perspectives Study — Questionnaire</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Instrument+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+</head>
+
+<body>
+
+  <div id="progress-rail">
+    <div id="progress-fill"></div>
+  </div>
+
+  <nav id="dots">
+    <div class="dot on" data-t="intro" title="Introduction"></div>
+    <div class="dot" data-t="sA" title="Profile"></div>
+    <div class="dot" data-t="sB" title="Identity & Strategy"></div>
+    <div class="dot" data-t="sC" title="Signalling & Equity"></div>
+    <div class="dot" data-t="sD" title="African Context"></div>
+    <div class="dot" data-t="sE" title="Synthesis"></div>
+  </nav>
+
+  <header>
+    <div class="kicker">Miva Open University · MBA Dissertation · 2025</div>
+    <h1>Founder Perspectives on Personal Branding in African Createch</h1>
+  </header>
+
+  <div class="shell" id="shell">
+
+    <!-- ══ INTRO ══ -->
+    <div id="intro" class="intro-card">
+      <div class="tag">Participant Information &amp; Consent</div>
+      <h2>Thank you for agreeing to be part of this study.</h2>
+      <p>
+        This questionnaire forms the primary data collection instrument for an <strong>MBA dissertation</strong>
+        examining how founders of African Createch startups build and manage their personal brands on digital platforms
+        — and how those efforts shape how audiences perceive, trust, and engage with their ventures.
+      </p>
+      <p>
+        The questions are deliberately open. There are <strong>no right answers</strong>, no test, no trick. What
+        matters is your honest, reflective account — written the way you would speak if we were sitting across from each
+        other. Please resist the pull to sound polished. The rawer and more specific your answers, the more analytically
+        valuable they are.
+      </p>
+      <p>
+        The questionnaire has <strong>five sections</strong> and takes approximately <strong>35–50 minutes</strong>.
+        Each section is anchored to a specific research question, so your time is spent only on what is analytically
+        necessary — nothing is filler.
+      </p>
+      <p>
+        <strong>Your responses are automatically stored in a secure encrypted database.</strong> You will be assigned a
+        pseudonym and no identifying details will appear in the final research report. Your email, if provided, is
+        stored separately and will never appear in the analysis.
+      </p>
+      <div class="consent-box">
+        <label>
+          <input type="checkbox" id="consentCheck">
+          <span>I understand that my participation is entirely voluntary, that my responses will be anonymised and used
+            solely for academic research, that I may withdraw at any point without consequence, and I give my informed
+            consent to participate.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ══ FORM ══ -->
+    <form id="form" style="display:none;" autocomplete="off" novalidate>
+
+      <!-- ── SECTION A: PARTICIPANT PROFILE ── -->
+      <div class="section" id="sA">
+        <div class="section-head">
+          <div class="section-num">A</div>
+          <div class="section-meta">
+            <h3>Participant Profile</h3>
+            <div class="sub">Background · ~5 min</div>
+          </div>
+        </div>
+        <p class="section-rationale">
+          This section establishes your profile as a participant. The information here will be used to construct an
+          anonymised participant table in the dissertation and to contextualise your subsequent responses.
+        </p>
+
+        <div class="q-wrap" id="w-country">
+          <span class="q-label">A1. Which country are you currently based in?</span>
+          <input type="text" id="country" placeholder="e.g. Nigeria, Ghana, Kenya, South Africa…">
+          <div class="err-msg">Please tell us where you are based.</div>
+        </div>
+
+        <div class="two-col">
+          <div class="q-wrap" id="w-duration">
+            <span class="q-label">A2. How long has your startup been operating?</span>
+            <select id="duration">
+              <option value="">Select…</option>
+              <option>Less than 1 year</option>
+              <option>1 – 2 years</option>
+              <option>2 – 4 years</option>
+              <option>4 – 7 years</option>
+              <option>More than 7 years</option>
+            </select>
+            <div class="err-msg">Please select a range.</div>
+          </div>
+          <div class="q-wrap">
+            <span class="q-label">A3. How would you describe your sector within Createch? <em>(Optional)</em></span>
+            <input type="text" id="sector" placeholder="e.g. Music tech, Digital content, AR/VR…">
+          </div>
+        </div>
+
+        <div class="q-wrap" id="w-platforms">
+          <span class="q-label">A4. Which digital platforms do you use most actively as a founder? <em>Select all that
+              apply.</em></span>
+          <div class="opt-grid">
+            <label class="opt-item"><input type="checkbox" name="plat" value="LinkedIn"> LinkedIn</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="X (Twitter)"> X (Twitter)</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="Instagram"> Instagram</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="YouTube"> YouTube</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="TikTok"> TikTok</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="Podcast"> Podcast / Audio</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="Facebook"> Facebook</label>
+            <label class="opt-item"><input type="checkbox" name="plat" value="Other"> Other</label>
+          </div>
+          <div class="err-msg">Please select at least one platform.</div>
+        </div>
+
+        <div class="q-wrap" id="w-a-self">
+          <span class="q-label">A5. Briefly — what does your startup do, and who is it for?</span>
+          <div class="q-probe"><span>Not a pitch. Just describe it plainly, the way you would to someone who does not
+              know your industry.</span></div>
+          <textarea id="a_self_intro" class="lg" placeholder="Describe your venture…"
+            oninput="cc(this,'cc-a5',500)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-a5">0 / 500</div>
+          </div>
+          <div class="err-msg">Please share a brief description of your startup.</div>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- ── SECTION B: RQ1 · SPT · SIT ── -->
+      <div class="section" id="sB">
+        <div class="section-head">
+          <div class="section-num">B</div>
+          <div class="section-meta">
+            <h3>Identity, Strategy, and Self-Presentation</h3>
+            <div class="sub">RQ1 · ~12 min</div>
+          </div>
+        </div>
+        <p class="section-rationale">
+          This section addresses the first research question: how do African Createch founders perceive and
+          strategically implement their personal branding? Questions are grounded in Self-Presentation Theory (Goffman,
+          1959) and Social Identity Theory (Tajfel &amp; Turner, 1979). Your answers will help the study understand how
+          identity is constructed, managed, and performed across digital platforms.
+        </p>
+
+        <div class="q-wrap" id="w-b1">
+          <span class="q-anchor">RQ1 · Self-Presentation Theory</span>
+          <span class="q-label">B1. When you are active online as a founder — posting, engaging, sharing — what are you
+            consciously trying to communicate about who you are? Is there a version of yourself you are building,
+            protecting, or amplifying?</span>
+          <div class="q-probe">
+            <span>Think about the impression you want people to form — not just what you post, but the identity
+              underneath the posts.</span>
+            <span>Is the version of you that exists publicly an accurate reflection of who you are privately, or is it a
+              curated construct? How do you experience that distinction?</span>
+          </div>
+          <textarea id="b1_intent" class="xl" placeholder="Your answer here…" oninput="cc(this,'cc-b1',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-b1">0 / 900</div>
+          </div>
+          <div class="err-msg">Please respond to this question — it is central to the study.</div>
+        </div>
+
+        <div class="q-wrap" id="w-b2">
+          <span class="q-anchor">RQ1 · Strategic Intent</span>
+          <span class="q-label">B2. How intentional is your approach to your public presence? Walk me through how you
+            actually make decisions about what to share, how often, and in what tone.</span>
+          <div class="q-probe">
+            <span>Do you have a strategy — even an informal one? Or does your presence evolve more instinctively? What
+              drives those decisions?</span>
+            <span>Have the rules you follow (consciously or not) changed as your startup has grown?</span>
+          </div>
+          <textarea id="b2_deliberateness" class="xl" placeholder="Describe your decision-making process…"
+            oninput="cc(this,'cc-b2',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-b2">0 / 900</div>
+          </div>
+          <div class="err-msg">Please respond to this question.</div>
+        </div>
+
+        <div class="q-wrap" id="w-b3">
+          <span class="q-anchor">RQ1 · Social Identity · Turning Point</span>
+          <span class="q-label">B3. Has there been a moment — a specific event, piece of feedback, or realisation — when
+            your understanding of your own public identity as a founder shifted? What happened, and what changed in how
+            you showed up after that?</span>
+          <div class="q-probe">
+            <span>This could be a post that spread unexpectedly, a critical response you received, a founder you
+              observed, a failure, or an opportunity that arrived because of your visibility. Be as specific as you
+              can.</span>
+          </div>
+          <textarea id="b3_turning_point" class="xxl" placeholder="Tell the story…"
+            oninput="cc(this,'cc-b3',1100)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-b3">0 / 1100</div>
+          </div>
+          <div class="err-msg">Please share your experience with this question.</div>
+        </div>
+
+        <div class="q-wrap" id="w-b4">
+          <span class="q-anchor">RQ1 · Identity Boundary Management</span>
+          <span class="q-label">B4. Where do you draw the line between what you share publicly and what you keep
+            private? How do you manage that boundary — and has it shifted?</span>
+          <div class="q-probe">
+            <span>Think about specific categories: vulnerability, failure, personal life, financial situation, political
+              views, conflicts with others in your ecosystem. Where is the line, and why there?</span>
+            <span>Has sharing something personal ever cost you something professionally — or has withholding it?</span>
+          </div>
+          <textarea id="b4_boundary" class="xl" placeholder="Reflect on your boundaries…"
+            oninput="cc(this,'cc-b4',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-b4">0 / 900</div>
+          </div>
+          <div class="err-msg">Please respond to this question.</div>
+        </div>
+
+        <div class="q-wrap">
+          <span class="q-anchor">RQ1 · Social Reference</span>
+          <span class="q-label">B5. Is there a founder — inside or outside Africa — whose way of presenting themselves
+            online you study or genuinely admire? What specifically do they do that you find effective or instructive?
+            <em>(Optional)</em></span>
+          <textarea id="b5_model" placeholder="Describe who and what resonates, and why…"
+            oninput="cc(this,'cc-b5',700)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-b5">0 / 700</div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- ── SECTION C: RQ2 · Signalling · RBV ── -->
+      <div class="section" id="sC">
+        <div class="section-head">
+          <div class="section-num">C</div>
+          <div class="section-meta">
+            <h3>Signalling, Trust, and Your Startup's Reputation</h3>
+            <div class="sub">RQ2 · ~10 min</div>
+          </div>
+        </div>
+        <p class="section-rationale">
+          This section addresses the second research question: how does founder personal branding influence the digital
+          brand equity of their startup — specifically across dimensions of awareness, associations, perceived quality,
+          and loyalty? Questions draw on Signalling Theory (Spence, 1973) and the Resource-Based View (Barney, 1991).
+        </p>
+
+        <div class="q-wrap" id="w-c1">
+          <span class="q-anchor">RQ2 · Signalling Theory · Brand Awareness</span>
+          <span class="q-label">C1. Has something you said or did publicly — a post, a talk, a thread, an interview —
+            ever translated into a tangible shift in how people found or responded to your startup? What happened, and
+            what do you think it signalled about the business?</span>
+          <div class="q-probe">
+            <span>Think about inbound inquiries, investor interest, partnership requests, media attention, or new
+              customers arriving because of your visibility rather than the startup's own marketing.</span>
+            <span>What was the signal being received? What did people infer about the startup from what they saw of
+              you?</span>
+          </div>
+          <textarea id="c1_awareness_link" class="xxl" placeholder="Describe a concrete moment or a recurring pattern…"
+            oninput="cc(this,'cc-c1',1100)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-c1">0 / 1100</div>
+          </div>
+          <div class="err-msg">Please share your experience here — even if indirect.</div>
+        </div>
+
+        <div class="q-wrap" id="w-c2">
+          <span class="q-anchor">RQ2 · Trust Transfer · Perceived Quality</span>
+          <span class="q-label">C2. In your experience, when someone trusts you as a person — your character, your
+            judgment, your competence — does that trust transfer to your startup? Or do people tend to evaluate you and
+            the company as separate things?</span>
+          <div class="q-probe">
+            <span>Think about customers, investors, partners, and employees. Does the equation work differently
+              depending on who the audience is?</span>
+            <span>Have you ever felt that your personal reputation was an asset the startup could not have built on its
+              own — or a liability it had to overcome?</span>
+          </div>
+          <textarea id="c2_trust_transfer" class="xl" placeholder="Describe what you have observed…"
+            oninput="cc(this,'cc-c2',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-c2">0 / 900</div>
+          </div>
+          <div class="err-msg">Please respond to this question.</div>
+        </div>
+
+        <div class="q-wrap" id="w-c3">
+          <span class="q-anchor">RQ2 · Reputation Risk · Brand Associations</span>
+          <span class="q-label">C3. Has your public presence ever created friction or risk for your startup — something
+            you expressed, were associated with, or a misstep that attached itself to the company's reputation? How did
+            you navigate it?</span>
+          <div class="q-probe">
+            <span>You do not need to disclose specifics if they feel too sensitive. But if there has been a moment of
+              tension between your personal voice and the startup's standing — how did you manage that boundary?</span>
+            <span>Do you think about this kind of risk proactively? Does it shape what you choose to say or not
+              say?</span>
+          </div>
+          <textarea id="c3_reputation_risk" class="xl" placeholder="Describe the tension and how you handled it…"
+            oninput="cc(this,'cc-c3',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-c3">0 / 900</div>
+          </div>
+          <div class="err-msg">Please respond to this question.</div>
+        </div>
+
+        <div class="q-wrap">
+          <span class="q-anchor">RQ2 · Brand Loyalty · RBV</span>
+          <span class="q-label">C4. Think about the people most loyal to your startup — your most engaged users,
+            community, or recurring customers. What role, if any, did your personal visibility play in getting them
+            there? Is personal branding a resource your startup could not easily replicate any other way? <em>(Optional
+              depth question)</em></span>
+          <textarea id="c4_loyalty_origin" class="lg" placeholder="Your reflection…"
+            oninput="cc(this,'cc-c4',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-c4">0 / 900</div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- ── SECTION D: RQ3 · AFRICAN CONTEXT ── -->
+      <div class="section" id="sD">
+        <div class="section-head">
+          <div class="section-num">D</div>
+          <div class="section-meta">
+            <h3>The African Context — What the Environment Actually Does</h3>
+            <div class="sub">RQ3 · ~8 min</div>
+          </div>
+        </div>
+        <p class="section-rationale">
+          This section addresses the third research question: what contextual factors — structural, cultural,
+          infrastructural — shape how African Createch founders build and navigate their personal brands? We are not
+          looking for a celebratory or a critical frame. We are looking for your grounded, specific account of the
+          conditions you operate within.
+        </p>
+
+        <div class="q-wrap" id="w-d1">
+          <span class="q-anchor">RQ3 · Structural Friction</span>
+          <span class="q-label">D1. What has been genuinely hard — not in a generic sense, but specifically — about
+            building a credible, visible public presence as a founder in your African operating environment?</span>
+          <div class="q-probe">
+            <span>Consider: access to infrastructure, internet reliability and cost, platform algorithm biases, the
+              economics of content creation, cultural norms around self-promotion and visibility, or anything particular
+              to your country or sector.</span>
+            <span>Are there things founders in London or San Francisco take for granted that you have had to work
+              around?</span>
+          </div>
+          <textarea id="d1_structural_friction" class="xxl" placeholder="Be specific and candid…"
+            oninput="cc(this,'cc-d1',1100)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-d1">0 / 1100</div>
+          </div>
+          <div class="err-msg">Please share your experience here — specificity is valuable.</div>
+        </div>
+
+        <div class="q-wrap" id="w-d2">
+          <span class="q-anchor">RQ3 · Identity as Strategic Asset or Friction</span>
+          <span class="q-label">D2. Being an African founder — does that identity operate as a strategic asset in how
+            you position yourself publicly, or does it create friction? Or does it depend entirely on which audience you
+            are in front of?</span>
+          <div class="q-probe">
+            <span>Walk through at least two different audiences: for example, local customers vs. international
+              investors vs. the global tech community vs. peers in other African markets.</span>
+            <span>Have you ever consciously leaned into your African identity as part of your brand? Or downplayed it?
+              What drove those choices?</span>
+          </div>
+          <textarea id="d2_identity_as_asset" class="xl"
+            placeholder="Describe how this plays out across different contexts…"
+            oninput="cc(this,'cc-d2',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-d2">0 / 900</div>
+          </div>
+          <div class="err-msg">Please respond to this question.</div>
+        </div>
+
+        <div class="q-wrap">
+          <span class="q-anchor">RQ3 · Ecosystem Influence</span>
+          <span class="q-label">D3. How has the Createch ecosystem around you — fellow founders, communities, events,
+            African tech media — shaped how you think about your own public presence? What has it taught you, and what
+            has it got wrong? <em>(Optional)</em></span>
+          <textarea id="d3_ecosystem_learning" class="lg" placeholder="What the ecosystem has shown you…"
+            oninput="cc(this,'cc-d3',900)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-d3">0 / 900</div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="div">
+
+      <!-- ── SECTION E: RQ4 · SYNTHESIS ── -->
+      <div class="section" id="sE">
+        <div class="section-head">
+          <div class="section-num">E</div>
+          <div class="section-meta">
+            <h3>Strategic Opportunity and the Untold Story</h3>
+            <div class="sub">RQ4 · Closing · ~5 min</div>
+          </div>
+        </div>
+        <p class="section-rationale">
+          This final section addresses the fourth research question: what opportunities exist for African Createch
+          founders to leverage personal branding more effectively for digital brand equity growth? These questions also
+          invite you to surface what the dominant narrative consistently gets wrong. Please take your time here.
+        </p>
+
+        <div class="q-wrap" id="w-e1">
+          <span class="q-anchor">RQ4 · Strategic Opportunity · Reflexive Insight</span>
+          <span class="q-label">E1. If you were advising a Createch founder just starting out — someone building in
+            Africa, trying to build a public presence that actually serves their startup — what would you tell them that
+            most people get wrong? What is the genuine opportunity most founders in your position are missing?</span>
+          <div class="q-probe">
+            <span>This is not about generic advice. It is about what you know from your specific experience that the
+              standard playbook does not account for — particularly in the African Createch context.</span>
+            <span>What would you do differently if you were starting again today?</span>
+          </div>
+          <textarea id="e1_strategic_opportunity" class="xxl" placeholder="Your honest strategic insight…"
+            oninput="cc(this,'cc-e1',1100)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-e1">0 / 1100</div>
+          </div>
+          <div class="err-msg">Please respond to this question — it is the analytical culmination of the study.</div>
+        </div>
+
+        <div class="q-wrap" id="w-e2">
+          <span class="q-anchor">RQ4 · Counter-Narrative</span>
+          <span class="q-label">E2. Is there something about building in Africa, or about founder personal branding more
+            broadly, that you feel does not get talked about honestly? Something the prevailing narrative — in tech
+            media, investor circles, or the startup community — consistently flattens, romanticises, or just gets
+            wrong?</span>
+          <div class="q-probe">
+            <span>This is your space to say what needs to be said. The most analytically generative responses to this
+              question in qualitative research are often the ones the participant was not sure they should say.</span>
+          </div>
+          <textarea id="e2_untold_narrative" class="xxl" placeholder="Say what you need to say…"
+            oninput="cc(this,'cc-e2',1300)"></textarea>
+          <div class="char-row">
+            <div class="char-note" id="cc-e2">0 / 1300</div>
+          </div>
+          <div class="err-msg">Please share your perspective here.</div>
+        </div>
+
+        <div class="q-wrap">
+          <span class="q-label">E3. Is there a Createch founder whose work and public presence you think deserves
+            attention in this study? <em>(Optional referral — sharing their name does not commit either of you to
+              anything)</em></span>
+          <textarea id="referral" placeholder="Name and brief context…"></textarea>
+        </div>
+
+        <div class="q-wrap">
+          <span class="q-label">E4. If you are open to a brief follow-up to clarify or expand on anything you shared,
+            please leave a contact email. <em>(Optional — stored separately from your responses)</em></span>
+          <input type="email" id="followup_email" placeholder="your@email.com">
+        </div>
+      </div>
+
+      <!-- ── SUBMIT ── -->
+      <div class="submit-zone">
+        <div class="draft-bar">
+          <div class="draft-copy">
+            <div class="draft-label">Local draft</div>
+            <div class="draft-status" id="draftStatus" aria-live="polite">Autosave is on. Your in-progress answers stay
+              in this browser until you submit or clear them.</div>
+          </div>
+          <button type="button" class="draft-clear" id="clearDraftBtn">Clear Draft</button>
+        </div>
+        <button type="submit" class="btn" id="submitBtn" disabled>
+          Submit My Responses
+        </button>
+        <div class="submit-note">Responses are saved to an encrypted database and anonymised before analysis. No
+          identifying information appears in the final dissertation.</div>
+        <div class="save-status" id="saveStatus" aria-live="polite"></div>
+      </div>
+
+    </form>
+
+    <!-- ══ SUCCESS ══ -->
+    <div id="done">
+      <div class="mark">✦</div>
+      <h2>Thank you for your contribution.</h2>
+      <p>Your responses have been securely stored and will form part of the qualitative dataset for this study. Every
+        account matters.</p>
+      <p>You will only be contacted if you provided an email and indicated openness to follow-up. Your anonymity is
+        fully protected throughout.</p>
+      <p style="font-size:12px; font-style:italic; margin-top:22px;">Miva Open University · MBA Dissertation Research ·
+        2025</p>
+    </div>
+
+  </div><!-- /shell -->
+
+  <script src="js/app.js"></script>
+</body>
+
+</html>

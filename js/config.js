@@ -1,0 +1,4 @@
+window.CREATECH_CONFIG = {
+  supabaseUrl: 'https://yqissejeagagavmfyxnu.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlxaXNzZWplYWdhZ2F2bWZ5eG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Mjk2MDcsImV4cCI6MjA5MTMwNTYwN30.20HCb9YGxXIHqpnRdg2O_9Y0aBKXSyXhy5r5XWMbL1U',
+};
