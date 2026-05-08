@@ -196,7 +196,7 @@ const requestHandler = async (req, res) => {
   const requestUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const pathname = requestUrl.pathname;
 
-  if (pathname === '/health') {
+  if (pathname === '/health' || pathname === '/api/health') {
     return sendJson(res, 200, {
       ok: true,
       supabaseConfigured: Boolean(runtimeConfig.supabaseUrl && runtimeConfig.supabaseAnonKey),
@@ -205,7 +205,7 @@ const requestHandler = async (req, res) => {
     });
   }
 
-  if (pathname === '/js/config.js') {
+  if (pathname === '/js/config.js' || pathname === '/api/config') {
     const body = `window.CREATECH_CONFIG = ${JSON.stringify({
       supabaseUrl: runtimeConfig.supabaseUrl,
       supabaseAnonKey: runtimeConfig.supabaseAnonKey,
@@ -218,7 +218,7 @@ const requestHandler = async (req, res) => {
     return res.end(body);
   }
 
-  if (pathname === '/admin/export') {
+  if (pathname === '/admin/export' || pathname === '/api/admin-export') {
     if (!isAuthorizedAdmin(requestUrl, req.headers)) {
       return sendJson(res, 401, { error: 'Unauthorized export request.' });
     }
