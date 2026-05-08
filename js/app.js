@@ -80,7 +80,7 @@ function collect() {
     country: v('country'),
     operating_duration: v('duration'),
     sector: v('sector'),
-    platforms: plats,
+    platforms: plats.join('; '),
     a_self_intro: v('a_self_intro'),
     b1_intent: v('b1_intent'),
     b2_deliberateness: v('b2_deliberateness'),
@@ -260,13 +260,20 @@ async function handleSubmit() {
   if (!btn || !status) return;
   btn.disabled = true;
   btn.textContent = 'Saving…';
-  status.textContent = 'Sending to database…';
+  status.textContent = 'Sending submission…';
   status.className = 'save-status';
 
   try {
     const responseId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const followupEmail = v('followup_email');
-    const payload = { ...collect(), followup_email: followupEmail, id: responseId };
+    const payload = {
+      ...collect(),
+      submitted_at: new Date().toISOString(),
+      followup_email: followupEmail,
+      id: responseId,
+      submit_source: 'web',
+      submit_mode: APP_MODE,
+    };
     await submitQuestionnaire(payload);
 
     clearDraft(false);

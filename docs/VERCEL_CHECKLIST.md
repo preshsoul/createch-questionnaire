@@ -1,6 +1,6 @@
 # Vercel Deployment Checklist
 
-Use this when you want to confirm the live deployment is actually connected to the n8n submission workflow and still has the admin export path for Supabase.
+Use this when you want to confirm the live deployment is connected to the n8n submission workflow. The Supabase admin export path is optional.
 
 ## Required Vercel env vars
 
@@ -10,7 +10,9 @@ Use this when you want to confirm the live deployment is actually connected to t
 - `ADMIN_EXPORT_TOKEN`
 - `CREATECH_APP_MODE` should usually be `production`
 
-## Required Supabase objects
+## Optional Supabase admin export
+
+Only needed if you still want the old export/recovery route.
 
 - `responses` table exists
 - `followup_contacts` table exists
