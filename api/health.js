@@ -1,8 +1,5 @@
 module.exports = (req, res) => {
-  const supabaseConfigured = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-  );
+  const submitConfigured = Boolean(process.env.N8N_WEBHOOK_URL);
 
   const exportReady = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -15,7 +12,7 @@ module.exports = (req, res) => {
   res.statusCode = 200;
   res.end(JSON.stringify({
     ok: true,
-    supabaseConfigured,
+    submitConfigured,
     exportReady,
     appMode: (process.env.CREATECH_APP_MODE || 'production').trim().toLowerCase(),
     deployedOn: 'vercel',

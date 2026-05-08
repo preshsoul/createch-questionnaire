@@ -132,14 +132,14 @@ function syncModeBanner() {
 function syncConnectionBanner() {
   const el = document.getElementById('connectionPill');
   if (!el) return;
-  const configured = Boolean(window.CREATECH_CONFIG?.supabaseUrl && window.CREATECH_CONFIG?.supabaseAnonKey);
+  const configured = Boolean(window.CREATECH_CONFIG?.submitConfigured);
   el.hidden = false;
   if (configured) {
-    el.textContent = 'Supabase connected';
-    el.title = 'The questionnaire loaded its Supabase config from the local server.';
+    el.textContent = 'Submission ready';
+    el.title = 'The questionnaire is connected to the submission workflow.';
   } else {
-    el.textContent = 'Supabase not loaded';
-    el.title = 'Run the questionnaire through npm start so the local server can inject Supabase config.';
+    el.textContent = 'Submission not loaded';
+    el.title = 'Run the questionnaire through the configured host so the submission workflow can be reached.';
   }
 }
 
@@ -265,31 +265,16 @@ async function handleSubmit() {
 
   try {
     const responseId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const payload = { ...collect(), id: responseId };
     const followupEmail = v('followup_email');
-    await saveToSupabase(payload);
-    let followupSaved = false;
-
-    if (followupEmail) {
-      try {
-        await saveFollowupContact({
-          response_id: responseId,
-          pseudonym: payload.pseudonym,
-          email: followupEmail,
-        });
-        followupSaved = true;
-      } catch (followupErr) {
-        console.warn(followupErr);
-      }
-    }
+    const payload = { ...collect(), followup_email: followupEmail, id: responseId };
+    await submitQuestionnaire(payload);
 
     clearDraft(false);
-    if (payload.pseudonym && followupEmail) {
-      status.textContent = followupSaved
-        ? `✓ Saved successfully. Reference: ${payload.pseudonym}. Follow-up email stored separately.`
-        : `✓ Saved successfully. Reference: ${payload.pseudonym}. Main response saved, but follow-up email could not be stored.`;
-    } else if (payload.pseudonym) {
+    if (payload.pseudonym) {
       status.textContent = `✓ Saved successfully. Reference: ${payload.pseudonym}.`;
+      if (followupEmail) {
+        status.textContent += ' Follow-up email included.';
+      }
     } else {
       status.textContent = '✓ Saved successfully.';
     }
@@ -301,7 +286,7 @@ async function handleSubmit() {
     }, 600);
   } catch (err) {
     console.error(err);
-    status.textContent = '⚠ Could not connect to database. Please check your internet and try again.';
+    status.textContent = '⚠ Could not submit your response. Please check your connection and try again.';
     status.className = 'save-status err';
     btn.disabled = false;
     btn.textContent = 'Submit My Responses';

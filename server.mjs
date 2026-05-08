@@ -27,14 +27,24 @@ async function loadRuntimeConfig() {
     const envText = await readFile(join(rootDir, '.env'), 'utf8');
     const env = parseEnv(envText);
     return {
-      supabaseUrl: env.NEXT_PUBLIC_SUPABASE_URL || '',
-      supabaseAnonKey: env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-      supabaseServiceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || '',
-      adminExportToken: env.ADMIN_EXPORT_TOKEN || '',
-      appMode: (env.CREATECH_APP_MODE || 'production').trim().toLowerCase(),
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '',
+      supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+      supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || '',
+      adminExportToken: process.env.ADMIN_EXPORT_TOKEN || env.ADMIN_EXPORT_TOKEN || '',
+      n8nWebhookUrl: process.env.N8N_WEBHOOK_URL || env.N8N_WEBHOOK_URL || '',
+      n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET || env.N8N_WEBHOOK_SECRET || '',
+      appMode: (process.env.CREATECH_APP_MODE || env.CREATECH_APP_MODE || 'production').trim().toLowerCase(),
     };
   } catch {
-    return { supabaseUrl: '', supabaseAnonKey: '', supabaseServiceRoleKey: '', adminExportToken: '', appMode: 'production' };
+    return {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+      supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+      adminExportToken: process.env.ADMIN_EXPORT_TOKEN || '',
+      n8nWebhookUrl: process.env.N8N_WEBHOOK_URL || '',
+      n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET || '',
+      appMode: (process.env.CREATECH_APP_MODE || 'production').trim().toLowerCase(),
+    };
   }
 }
 
@@ -43,6 +53,45 @@ const runtimeConfig = await loadRuntimeConfig();
 function sendJson(res, statusCode, body) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(body, null, 2));
+}
+
+async function readJsonBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  const raw = Buffer.concat(chunks).toString('utf8').trim();
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new Error('Submission body must be valid JSON.');
+  }
+}
+
+async function forwardSubmission(payload) {
+  if (!runtimeConfig.n8nWebhookUrl) {
+    throw new Error('Missing N8N_WEBHOOK_URL in .env.');
+  }
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (runtimeConfig.n8nWebhookSecret) {
+    headers['X-Webhook-Secret'] = runtimeConfig.n8nWebhookSecret;
+  }
+
+  const response = await fetch(runtimeConfig.n8nWebhookUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  const contentType = response.headers.get('content-type') || 'application/json; charset=utf-8';
+  const text = await response.text();
+  return {
+    status: response.status,
+    contentType,
+    body: text || JSON.stringify({ ok: true }),
+  };
 }
 
 function escapeCsvValue(value) {
@@ -199,7 +248,7 @@ const requestHandler = async (req, res) => {
   if (pathname === '/health' || pathname === '/api/health') {
     return sendJson(res, 200, {
       ok: true,
-      supabaseConfigured: Boolean(runtimeConfig.supabaseUrl && runtimeConfig.supabaseAnonKey),
+      submitConfigured: Boolean(runtimeConfig.n8nWebhookUrl),
       exportReady: Boolean(runtimeConfig.supabaseUrl && runtimeConfig.supabaseServiceRoleKey && runtimeConfig.adminExportToken),
       appMode: runtimeConfig.appMode,
     });
@@ -207,8 +256,8 @@ const requestHandler = async (req, res) => {
 
   if (pathname === '/js/config.js' || pathname === '/api/config') {
     const body = `window.CREATECH_CONFIG = ${JSON.stringify({
-      supabaseUrl: runtimeConfig.supabaseUrl,
-      supabaseAnonKey: runtimeConfig.supabaseAnonKey,
+      submitEndpoint: '/api/submit',
+      submitConfigured: Boolean(runtimeConfig.n8nWebhookUrl),
       appMode: runtimeConfig.appMode,
     }, null, 2)};\n`;
     res.writeHead(200, {
@@ -216,6 +265,25 @@ const requestHandler = async (req, res) => {
       'Cache-Control': 'no-store',
     });
     return res.end(body);
+  }
+
+  if (pathname === '/submit' || pathname === '/api/submit') {
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', 'POST');
+      return sendJson(res, 405, { error: 'Method not allowed.' });
+    }
+
+    try {
+      const payload = await readJsonBody(req);
+      const forwarded = await forwardSubmission(payload);
+      res.writeHead(forwarded.status, {
+        'Content-Type': forwarded.contentType,
+        'Cache-Control': 'no-store',
+      });
+      return res.end(forwarded.body);
+    } catch (error) {
+      return sendJson(res, 503, { error: String(error?.message || error) });
+    }
   }
 
   if (pathname === '/admin/export' || pathname === '/api/admin-export') {
