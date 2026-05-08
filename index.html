@@ -615,10 +615,6 @@
       if (consentCheck.checked) goStep(1);
     });
 
-    document.getElementById('submitBtn').addEventListener('click', () => {
-      if (typeof handleSubmit === 'function') handleSubmit();
-    });
-
     window.showSuccess = function () {
       document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
       document.getElementById('done').classList.add('show');

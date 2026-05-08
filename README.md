@@ -14,13 +14,15 @@ Static questionnaire for an MBA dissertation study on founder personal branding 
 
 ## Local use
 
-1. Open `index.html` in a browser, or serve the folder with a simple static server.
-2. Update `js/config.js` with your Supabase project URL and anon key.
+1. Put your Supabase values in `.env` as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+2. Run `npm start` from the project folder and open the printed localhost URL.
 3. Run `sql/responses_schema.sql` in Supabase to create the `responses` table and insert policy.
-4. If you want a local preview server, run `python -m http.server` from the project folder and open the shown localhost URL.
+4. If you need to inspect the raw env wiring, the server serves `js/config.js` dynamically from `.env`.
 
 ## Notes
 
 - The form is intentionally static and dependency-light.
 - Responses are sent directly to Supabase from the browser, so only the public anon key should be used here.
+- The project now reads Supabase configuration from `.env` at runtime when served through `server.mjs`.
+- Draft responses are recoverable only from the same browser profile via localStorage; already-submitted rows can only be exported if Supabase read access is available.
 - If you change field IDs in the HTML, keep the same IDs in `js/app.js` and the SQL schema.

@@ -16,7 +16,7 @@ async function saveToSupabase(payload) {
 
   if (!isConfigured()) {
     throw new Error(
-      'Supabase is not configured. Fill in js/config.js with your project URL and anon key.'
+      'Supabase is not configured. Put the values in .env and run the app through npm start so js/config.js can be generated from the environment.'
     );
   }
 
