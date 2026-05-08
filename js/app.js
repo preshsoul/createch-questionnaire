@@ -264,16 +264,17 @@ async function handleSubmit() {
   status.className = 'save-status';
 
   try {
-    const payload = collect();
+    const responseId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const payload = { ...collect(), id: responseId };
     const followupEmail = v('followup_email');
-    const savedRow = await saveToSupabase(payload);
+    await saveToSupabase(payload);
     let followupSaved = false;
 
     if (followupEmail) {
       try {
         await saveFollowupContact({
-          response_id: savedRow?.id || null,
-          pseudonym: savedRow?.pseudonym || payload.pseudonym,
+          response_id: responseId,
+          pseudonym: payload.pseudonym,
           email: followupEmail,
         });
         followupSaved = true;
@@ -283,12 +284,12 @@ async function handleSubmit() {
     }
 
     clearDraft(false);
-    if (savedRow?.pseudonym && followupEmail) {
+    if (payload.pseudonym && followupEmail) {
       status.textContent = followupSaved
-        ? `✓ Saved successfully. Reference: ${savedRow.pseudonym}. Follow-up email stored separately.`
-        : `✓ Saved successfully. Reference: ${savedRow.pseudonym}. Main response saved, but follow-up email could not be stored.`;
-    } else if (savedRow?.pseudonym) {
-      status.textContent = `✓ Saved successfully. Reference: ${savedRow.pseudonym}.`;
+        ? `✓ Saved successfully. Reference: ${payload.pseudonym}. Follow-up email stored separately.`
+        : `✓ Saved successfully. Reference: ${payload.pseudonym}. Main response saved, but follow-up email could not be stored.`;
+    } else if (payload.pseudonym) {
+      status.textContent = `✓ Saved successfully. Reference: ${payload.pseudonym}.`;
     } else {
       status.textContent = '✓ Saved successfully.';
     }

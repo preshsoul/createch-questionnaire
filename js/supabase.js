@@ -44,9 +44,9 @@ async function saveSupabaseRow(table, payload, prefer = 'representation') {
 }
 
 async function saveToSupabase(payload) {
-  return saveSupabaseRow('responses', payload, 'representation');
+  return saveSupabaseRow('responses', payload, 'minimal');
 }
 
 async function saveFollowupContact(payload) {
-  return saveSupabaseRow('followup_contacts', payload, 'representation');
+  return saveSupabaseRow('followup_contacts', payload, 'minimal');
 }
