@@ -21,6 +21,12 @@ Static questionnaire for an MBA dissertation study on founder personal branding 
 5. For recovery/export, add `SUPABASE_SERVICE_ROLE_KEY` and `ADMIN_EXPORT_TOKEN` to `.env`, then call `/admin/export?token=...` from the local server. Add `&scope=test` or `&scope=real` to filter obvious synthetic rows.
 6. To test without mixing browser drafts, open the app with `?mode=test`; the session gets a test banner and test-style pseudonyms while still using the same table.
 
+## Vercel
+
+1. Add the same Supabase env vars in the Vercel project settings.
+2. `vercel.json` rewrites `/js/config.js`, `/health`, and `/admin/export` to serverless API routes.
+3. The local `server.mjs` is for development only; the deployed app should use the Vercel routes.
+
 ## Notes
 
 - The form is intentionally static and dependency-light.
@@ -30,3 +36,4 @@ Static questionnaire for an MBA dissertation study on founder personal branding 
 - The admin export endpoint uses the service-role key from `.env` and is protected by `ADMIN_EXPORT_TOKEN`.
 - Follow-up email is saved into a separate `followup_contacts` table so it stays out of the main responses dataset.
 - If you change field IDs in the HTML, keep the same IDs in `js/app.js` and the SQL schema.
+- If Supabase reports an unterminated dollar-quoted string while running `sql/responses_schema.sql`, paste the entire file in one run and make sure the function closes with `$$;` before the next statement.

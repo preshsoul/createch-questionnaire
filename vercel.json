@@ -1,0 +1,21 @@
+{
+  "rewrites": [
+    {
+      "source": "/js/config.js",
+      "destination": "/api/config"
+    },
+    {
+      "source": "/admin/export",
+      "destination": "/api/admin-export"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/health"
+    }
+  ],
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
+    }
+  }
+}
