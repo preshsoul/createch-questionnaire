@@ -145,7 +145,7 @@ function contentTypeFor(filePath) {
   }
 }
 
-const server = createServer(async (req, res) => {
+const requestHandler = async (req, res) => {
   const requestUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const pathname = requestUrl.pathname;
 
@@ -213,8 +213,36 @@ const server = createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Not found');
   }
-});
+};
 
-server.listen(port, () => {
-  console.log(`Createch Questionnaire running at http://localhost:${port}`);
-});
+function listenOn(candidatePort) {
+  return new Promise((resolve, reject) => {
+    const server = createServer(requestHandler);
+    server.once('error', err => {
+      server.close(() => reject(err));
+    });
+    server.listen(candidatePort, () => resolve(server));
+  });
+}
+
+let activeServer = null;
+let activePort = port;
+
+for (let attempt = 0; attempt < 10; attempt += 1) {
+  try {
+    activeServer = await listenOn(activePort);
+    break;
+  } catch (err) {
+    if (err?.code === 'EADDRINUSE') {
+      activePort += 1;
+      continue;
+    }
+    throw err;
+  }
+}
+
+if (!activeServer) {
+  throw new Error(`Could not find a free port starting at ${port}. Stop the existing server or set PORT manually.`);
+}
+
+console.log(`Createch Questionnaire running at http://localhost:${activePort}`);

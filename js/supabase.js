@@ -26,7 +26,7 @@ async function saveToSupabase(payload) {
       'Content-Type': 'application/json',
       apikey: key,
       Authorization: `Bearer ${key}`,
-      Prefer: 'return=minimal',
+      Prefer: 'return=representation',
     },
     body: JSON.stringify(payload),
   });
@@ -41,5 +41,6 @@ async function saveToSupabase(payload) {
     throw new Error(`Supabase error: ${res.status} - ${err}`);
   }
 
-  return true;
+  const data = await res.json().catch(() => []);
+  return Array.isArray(data) ? data[0] || null : data;
 }

@@ -234,6 +234,11 @@ function clearDraft(resetForm = false) {
 // ── SUBMIT ──
 async function handleSubmit() {
   if (!validate()) {
+    const status = document.getElementById('saveStatus');
+    if (status) {
+      status.textContent = 'Please complete the highlighted required fields before submitting.';
+      status.className = 'save-status err';
+    }
     document.querySelector('.invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
@@ -246,9 +251,11 @@ async function handleSubmit() {
   status.className = 'save-status';
 
   try {
-    await saveToSupabase(collect());
+    const savedRow = await saveToSupabase(collect());
     clearDraft(false);
-    status.textContent = '✓ Saved successfully.';
+    status.textContent = savedRow?.pseudonym
+      ? `✓ Saved successfully. Reference: ${savedRow.pseudonym}.`
+      : '✓ Saved successfully.';
     status.className = 'save-status ok';
     setTimeout(() => {
       if (typeof window.showSuccess === 'function') {

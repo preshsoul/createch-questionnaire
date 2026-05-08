@@ -52,7 +52,7 @@ BEGIN
       ON responses
       FOR INSERT
       TO anon
-      WITH CHECK (true);
+      WITH CHECK (auth.role() = 'anon');
   END IF;
 END
 $$;
