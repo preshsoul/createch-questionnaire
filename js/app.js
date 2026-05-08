@@ -97,7 +97,6 @@ function collect() {
     e1_strategic_opportunity: v('e1_strategic_opportunity'),
     e2_untold_narrative: v('e2_untold_narrative'),
     referral: v('referral'),
-    followup_email: v('followup_email'),
     pseudonym: `${isTestMode ? 'T' : 'P'}${Math.random().toString(36).substring(2, 6).toUpperCase()}`
   };
 }
@@ -127,6 +126,20 @@ function syncModeBanner() {
     if (btn) btn.textContent = 'Submit Test Response';
   } else {
     el.hidden = true;
+  }
+}
+
+function syncConnectionBanner() {
+  const el = document.getElementById('connectionPill');
+  if (!el) return;
+  const configured = Boolean(window.CREATECH_CONFIG?.supabaseUrl && window.CREATECH_CONFIG?.supabaseAnonKey);
+  el.hidden = false;
+  if (configured) {
+    el.textContent = 'Supabase connected';
+    el.title = 'The questionnaire loaded its Supabase config from the local server.';
+  } else {
+    el.textContent = 'Supabase not loaded';
+    el.title = 'Run the questionnaire through npm start so the local server can inject Supabase config.';
   }
 }
 
@@ -251,11 +264,34 @@ async function handleSubmit() {
   status.className = 'save-status';
 
   try {
-    const savedRow = await saveToSupabase(collect());
+    const payload = collect();
+    const followupEmail = v('followup_email');
+    const savedRow = await saveToSupabase(payload);
+    let followupSaved = false;
+
+    if (followupEmail) {
+      try {
+        await saveFollowupContact({
+          response_id: savedRow?.id || null,
+          pseudonym: savedRow?.pseudonym || payload.pseudonym,
+          email: followupEmail,
+        });
+        followupSaved = true;
+      } catch (followupErr) {
+        console.warn(followupErr);
+      }
+    }
+
     clearDraft(false);
-    status.textContent = savedRow?.pseudonym
-      ? `✓ Saved successfully. Reference: ${savedRow.pseudonym}.`
-      : '✓ Saved successfully.';
+    if (savedRow?.pseudonym && followupEmail) {
+      status.textContent = followupSaved
+        ? `✓ Saved successfully. Reference: ${savedRow.pseudonym}. Follow-up email stored separately.`
+        : `✓ Saved successfully. Reference: ${savedRow.pseudonym}. Main response saved, but follow-up email could not be stored.`;
+    } else if (savedRow?.pseudonym) {
+      status.textContent = `✓ Saved successfully. Reference: ${savedRow.pseudonym}.`;
+    } else {
+      status.textContent = '✓ Saved successfully.';
+    }
     status.className = 'save-status ok';
     setTimeout(() => {
       if (typeof window.showSuccess === 'function') {
@@ -282,3 +318,4 @@ document.getElementById('clearDraftBtn')?.addEventListener('click', () => {
 
 restoreDraft();
 syncModeBanner();
+syncConnectionBanner();

@@ -129,7 +129,7 @@
           necessary.</p>
         <p><strong>Your responses are automatically stored in a secure encrypted database.</strong> You will be
           assigned a pseudonym and no identifying details will appear in the final research report. Your email, if
-          provided, is stored separately and will never appear in the analysis.</p>
+          provided, is stored in a separate contact table and will never appear in the analysis export.</p>
         <div class="consent-box">
           <label>
             <input type="checkbox" id="consentCheck">
@@ -545,6 +545,7 @@
       </div>
 
       <div class="submit-zone">
+        <div class="connection-pill" id="connectionPill" hidden>Supabase connected</div>
         <div class="mode-pill" id="modePill" hidden>Test mode</div>
         <div class="draft-bar">
           <div class="draft-copy">

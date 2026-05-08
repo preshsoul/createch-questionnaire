@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS responses (
 
   -- Referral + contact
   referral text,
+  -- Legacy column retained for backward compatibility; new submissions save email into followup_contacts.
   followup_email text
 );
 
@@ -119,3 +120,31 @@ $$;
 
 REVOKE ALL ON FUNCTION private.get_responses_reporting() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION private.get_responses_reporting() TO authenticated;
+
+CREATE TABLE IF NOT EXISTS followup_contacts (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  response_id uuid NOT NULL UNIQUE REFERENCES responses(id) ON DELETE CASCADE,
+  pseudonym text,
+  email text NOT NULL,
+  submitted_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE followup_contacts ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'followup_contacts'
+      AND policyname = 'allow_public_followup_insert'
+  ) THEN
+    CREATE POLICY "allow_public_followup_insert"
+      ON followup_contacts
+      FOR INSERT
+      TO anon
+      WITH CHECK (auth.role() = 'anon');
+  END IF;
+END
+$$;

@@ -119,6 +119,53 @@ async function fetchResponsesFromSupabase() {
   return JSON.parse(body);
 }
 
+async function fetchFollowupContactsFromSupabase() {
+  if (!runtimeConfig.supabaseUrl || !runtimeConfig.supabaseServiceRoleKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY or Supabase URL in .env.');
+  }
+  const endpoint = `${runtimeConfig.supabaseUrl}/rest/v1/followup_contacts?select=response_id,pseudonym,email,submitted_at`;
+  const res = await fetch(endpoint, {
+    headers: {
+      apikey: runtimeConfig.supabaseServiceRoleKey,
+      Authorization: `Bearer ${runtimeConfig.supabaseServiceRoleKey}`,
+    },
+  });
+  const body = await res.text();
+  if (!res.ok) {
+    const missingTable = res.status === 404 || body.includes('42P01');
+    if (missingTable) {
+      return [];
+    }
+    throw new Error(`Supabase export failed for followup_contacts: ${res.status} - ${body}`);
+  }
+  return JSON.parse(body);
+}
+
+function mergeFollowupContacts(rows, contacts) {
+  const contactMap = new Map();
+  for (const contact of contacts || []) {
+    const key = String(contact?.response_id || '').trim();
+    if (!key) continue;
+    if (!contactMap.has(key)) {
+      contactMap.set(key, contact);
+    }
+  }
+
+  return (rows || []).map(row => {
+    const contact = contactMap.get(String(row?.id || '').trim());
+    if (!contact) {
+      return {
+        ...row,
+        followup_email: row?.followup_email || '',
+      };
+    }
+    return {
+      ...row,
+      followup_email: row?.followup_email || contact.email || '',
+    };
+  });
+}
+
 function contentTypeFor(filePath) {
   switch (extname(filePath).toLowerCase()) {
     case '.html':
@@ -177,12 +224,14 @@ const requestHandler = async (req, res) => {
     }
     try {
       const rows = await fetchResponsesFromSupabase();
+      const followupContacts = await fetchFollowupContactsFromSupabase();
+      const mergedRows = mergeFollowupContacts(rows, followupContacts);
       const scope = String(requestUrl.searchParams.get('scope') || 'all').toLowerCase();
       const filteredRows = scope === 'test'
-        ? rows.filter(isLikelyTestRow)
+        ? mergedRows.filter(isLikelyTestRow)
         : scope === 'real'
-          ? rows.filter(row => !isLikelyTestRow(row))
-          : rows;
+          ? mergedRows.filter(row => !isLikelyTestRow(row))
+          : mergedRows;
       const format = String(requestUrl.searchParams.get('format') || 'json').toLowerCase();
       if (format === 'csv') {
         const csv = rowsToCsv(filteredRows);

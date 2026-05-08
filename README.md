@@ -28,4 +28,5 @@ Static questionnaire for an MBA dissertation study on founder personal branding 
 - The project now reads Supabase configuration from `.env` at runtime when served through `server.mjs`.
 - Draft responses are recoverable only from the same browser profile via localStorage; already-submitted rows can only be exported if Supabase read access is available.
 - The admin export endpoint uses the service-role key from `.env` and is protected by `ADMIN_EXPORT_TOKEN`.
+- Follow-up email is saved into a separate `followup_contacts` table so it stays out of the main responses dataset.
 - If you change field IDs in the HTML, keep the same IDs in `js/app.js` and the SQL schema.
