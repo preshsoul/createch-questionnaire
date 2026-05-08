@@ -62,7 +62,7 @@ function validate() {
     const wrap = document.getElementById(wrapId);
     if (!field || !wrap) return;
     const val = field.tagName === 'SELECT' ? field.value : field.value.trim();
-    const bad = val.length < (field.tagName === 'SELECT' ? 1 : 10);
+    const bad = val.length === 0;
     wrap.classList.toggle('invalid', bad);
     if (bad) ok = false;
   });
