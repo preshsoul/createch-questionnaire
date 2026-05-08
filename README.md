@@ -35,5 +35,7 @@ Static questionnaire for an MBA dissertation study on founder personal branding 
 - Draft responses are recoverable only from the same browser profile via localStorage; already-submitted rows can only be exported if Supabase read access is available.
 - The admin export endpoint uses the service-role key from `.env` and is protected by `ADMIN_EXPORT_TOKEN`.
 - Follow-up email is saved into a separate `followup_contacts` table so it stays out of the main responses dataset.
+- `sql/cleanup_test_rows.sql` removes the known synthetic submissions when you are ready to clean the table.
+- `docs/VERCEL_CHECKLIST.md` lists the live deployment checks for Supabase and Vercel.
 - If you change field IDs in the HTML, keep the same IDs in `js/app.js` and the SQL schema.
 - If Supabase reports an unterminated dollar-quoted string while running `sql/responses_schema.sql`, paste the entire file in one run and make sure the function closes with `$$;` before the next statement.
