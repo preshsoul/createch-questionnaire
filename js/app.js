@@ -4,6 +4,18 @@ function gateConsent(shouldScroll = false) {
   // This function is kept so existing event listeners don't break.
 }
 
+function getAppMode() {
+  const configMode = String(window.CREATECH_CONFIG?.appMode || '').trim().toLowerCase();
+  const params = new URLSearchParams(window.location.search);
+  const urlMode = String(params.get('mode') || '').trim().toLowerCase();
+  return urlMode || configMode || 'production';
+}
+
+const APP_MODE = getAppMode();
+const DRAFT_KEY = `createch-questionnaire:draft:v1:${APP_MODE}`;
+const isTestMode = APP_MODE === 'test';
+window.CREATECH_APP_MODE = APP_MODE;
+
 // ── CHAR COUNTER ──
 function cc(el, id, max) {
   const n = el.value.length;
@@ -86,13 +98,12 @@ function collect() {
     e2_untold_narrative: v('e2_untold_narrative'),
     referral: v('referral'),
     followup_email: v('followup_email'),
-    pseudonym: 'P' + Math.random().toString(36).substring(2, 6).toUpperCase()
+    pseudonym: `${isTestMode ? 'T' : 'P'}${Math.random().toString(36).substring(2, 6).toUpperCase()}`
   };
 }
 function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
 // ── DRAFT AUTOSAVE ──
-const DRAFT_KEY = 'createch-questionnaire:draft:v1';
 let draftTimer = null;
 let restoringDraft = false;
 
@@ -103,6 +114,20 @@ function draftMessage(text) {
 function draftStamp(prefix) {
   const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   draftMessage(`${prefix} ${time}.`);
+}
+
+function syncModeBanner() {
+  const el = document.getElementById('modePill');
+  if (!el) return;
+  if (isTestMode) {
+    el.hidden = false;
+    el.textContent = 'Test mode';
+    el.title = 'Submissions from this session are marked as test data.';
+    const btn = document.getElementById('submitBtn');
+    if (btn) btn.textContent = 'Submit Test Response';
+  } else {
+    el.hidden = true;
+  }
 }
 
 function readDraftState() {
@@ -249,3 +274,4 @@ document.getElementById('clearDraftBtn')?.addEventListener('click', () => {
 });
 
 restoreDraft();
+syncModeBanner();
