@@ -47,6 +47,7 @@ Create the workflow with these 4 nodes, in this order:
    - HTTP Method: `POST`
    - Path: `createch-questionnaire`
    - Respond: `Using Respond to Webhook node`
+   - Use the **Production URL** in Vercel, not the test URL
    - If you want protection, add webhook auth or keep the URL secret and validate `X-Webhook-Secret` in the next node
 
 2. **Code**
@@ -98,6 +99,7 @@ return [
    - Document: pick the spreadsheet you want to write to
    - Sheet: pick the tab you want to append to
    - Create the header row first so each field maps cleanly to a column
+   - Make sure the workflow is **Active** or the append step will never run for production traffic
 
 4. **Respond to Webhook**
    - Respond With: `JSON`
@@ -165,3 +167,15 @@ After building the workflow:
 - Send one test submission from the questionnaire.
 - Confirm a new row appears in Google Sheets.
 - Confirm the app shows a success message.
+
+## If the app says sent but the sheet stays empty
+
+Check these in order:
+
+1. The webhook URL in Vercel is the n8n **production** webhook URL, not the test URL.
+2. The n8n workflow is **Active**.
+3. The Google Sheets node has a credential with edit access to the target spreadsheet.
+4. The Google Sheets node is using the right spreadsheet tab, and the first row contains the headers listed above.
+5. The `Google Sheets` node runs before `Respond to Webhook`, so the success response only happens after the row append step.
+6. Open the n8n execution history and confirm the workflow actually ran for the submission.
+7. If `X-Webhook-Secret` is enabled, make sure the value matches exactly in Vercel and n8n.
