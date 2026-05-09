@@ -94,6 +94,12 @@ async function forwardSubmission(payload) {
   };
 }
 
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Secret');
+}
+
 function escapeCsvValue(value) {
   const text = value == null ? '' : String(value);
   if (/[",\n\r]/.test(text)) {
@@ -268,8 +274,15 @@ const requestHandler = async (req, res) => {
   }
 
   if (pathname === '/submit' || pathname === '/api/submit') {
+    setCorsHeaders(res);
+
+    if (req.method === 'OPTIONS') {
+      res.statusCode = 204;
+      return res.end();
+    }
+
     if (req.method !== 'POST') {
-      res.setHeader('Allow', 'POST');
+      res.setHeader('Allow', 'POST, OPTIONS');
       return sendJson(res, 405, { error: 'Method not allowed.' });
     }
 
@@ -279,6 +292,9 @@ const requestHandler = async (req, res) => {
       res.writeHead(forwarded.status, {
         'Content-Type': forwarded.contentType,
         'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-Webhook-Secret',
       });
       return res.end(forwarded.body);
     } catch (error) {

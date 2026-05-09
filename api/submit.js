@@ -39,9 +39,22 @@ async function forwardSubmission(payload) {
   };
 }
 
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Secret');
+}
+
 module.exports = async (req, res) => {
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    return res.end();
+  }
+
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'POST, OPTIONS');
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.statusCode = 405;
     return res.end(JSON.stringify({ error: 'Method not allowed.' }, null, 2));
@@ -53,6 +66,9 @@ module.exports = async (req, res) => {
     res.writeHead(forwarded.status, {
       'Content-Type': forwarded.contentType,
       'Cache-Control': 'no-store',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Webhook-Secret',
     });
     return res.end(forwarded.body);
   } catch (error) {
