@@ -1,14 +1,5 @@
-function getSubmitConfig() {
-  const config = window.CREATECH_CONFIG || {};
-  return {
-    endpoint: String(config.submitEndpoint || '/api/submit').trim() || '/api/submit',
-  };
-}
-
 async function submitQuestionnaire(payload) {
-  const { endpoint } = getSubmitConfig();
-
-  const res = await fetch(endpoint, {
+  const res = await fetch('/api/submit', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

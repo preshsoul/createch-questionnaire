@@ -87,8 +87,7 @@
     }
   </style>
 
-  <script src="/api/config"></script>
-  <script src="js/supabase.js"></script>
+  <script src="js/submit.js"></script>
 </head>
 
 <body>
@@ -539,25 +538,15 @@
 
         <div class="q-wrap">
           <span class="q-label">E4. If you are open to a brief follow-up, please leave a contact email.
-            <em>(Optional — stored separately)</em></span>
+            <em>(Optional)</em></span>
           <input type="email" id="followup_email" placeholder="your@email.com">
         </div>
       </div>
 
       <div class="submit-zone">
-        <div class="connection-pill" id="connectionPill" hidden>Submission ready</div>
-        <div class="mode-pill" id="modePill" hidden>Test mode</div>
-        <div class="draft-bar">
-          <div class="draft-copy">
-            <div class="draft-label">Local draft</div>
-            <div class="draft-status" id="draftStatus" aria-live="polite">Autosave is on. Your in-progress answers
-              stay in this browser until you submit or clear them.</div>
-          </div>
-          <button type="button" class="draft-clear" id="clearDraftBtn">Clear Draft</button>
-        </div>
         <button type="button" class="btn" id="submitBtn">Submit My Responses</button>
-        <div class="submit-note">Responses are sent securely through the submission workflow and anonymised before
-          analysis. No identifying information appears in the final dissertation.</div>
+        <div class="submit-note">Responses are sent through the submission workflow and saved to Google Sheets. No
+          identifying information appears in the final dissertation.</div>
         <div class="save-status" id="saveStatus" aria-live="polite"></div>
       </div>
 

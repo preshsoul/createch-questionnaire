@@ -27,23 +27,13 @@ async function loadRuntimeConfig() {
     const envText = await readFile(join(rootDir, '.env'), 'utf8');
     const env = parseEnv(envText);
     return {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '',
-      supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-      supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || '',
-      adminExportToken: process.env.ADMIN_EXPORT_TOKEN || env.ADMIN_EXPORT_TOKEN || '',
       n8nWebhookUrl: process.env.N8N_WEBHOOK_URL || env.N8N_WEBHOOK_URL || '',
       n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET || env.N8N_WEBHOOK_SECRET || '',
-      appMode: (process.env.CREATECH_APP_MODE || env.CREATECH_APP_MODE || 'production').trim().toLowerCase(),
     };
   } catch {
     return {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-      supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-      adminExportToken: process.env.ADMIN_EXPORT_TOKEN || '',
       n8nWebhookUrl: process.env.N8N_WEBHOOK_URL || '',
       n8nWebhookSecret: process.env.N8N_WEBHOOK_SECRET || '',
-      appMode: (process.env.CREATECH_APP_MODE || 'production').trim().toLowerCase(),
     };
   }
 }
@@ -53,6 +43,12 @@ const runtimeConfig = await loadRuntimeConfig();
 function sendJson(res, statusCode, body) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify(body, null, 2));
+}
+
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Secret');
 }
 
 async function readJsonBody(req) {
@@ -94,133 +90,6 @@ async function forwardSubmission(payload) {
   };
 }
 
-function setCorsHeaders(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Secret');
-}
-
-function escapeCsvValue(value) {
-  const text = value == null ? '' : String(value);
-  if (/[",\n\r]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-  return text;
-}
-
-function rowsToCsv(rows) {
-  const columns = [
-    'id',
-    'submitted_at',
-    'pseudonym',
-    'country',
-    'operating_duration',
-    'sector',
-    'platforms',
-    'a_self_intro',
-    'b1_intent',
-    'b2_deliberateness',
-    'b3_turning_point',
-    'b4_boundary',
-    'b5_model',
-    'c1_awareness_link',
-    'c2_trust_transfer',
-    'c3_reputation_risk',
-    'c4_loyalty_origin',
-    'd1_structural_friction',
-    'd2_identity_as_asset',
-    'd3_ecosystem_learning',
-    'e1_strategic_opportunity',
-    'e2_untold_narrative',
-    'referral',
-    'followup_email',
-  ];
-  const lines = [columns.join(',')];
-  for (const row of rows) {
-    lines.push(columns.map(column => {
-      const value = row?.[column];
-      if (Array.isArray(value)) return escapeCsvValue(value.join('; '));
-      return escapeCsvValue(value);
-    }).join(','));
-  }
-  return lines.join('\n');
-}
-
-function isLikelyTestRow(row) {
-  const pseudonym = String(row?.pseudonym || '').trim().toUpperCase();
-  return pseudonym.startsWith('T') || pseudonym.startsWith('PTEST');
-}
-
-function isAuthorizedAdmin(requestUrl, headers) {
-  const provided = String(requestUrl.searchParams.get('token') || headers['x-admin-token'] || '').trim();
-  return Boolean(runtimeConfig.adminExportToken && provided && provided === runtimeConfig.adminExportToken);
-}
-
-async function fetchResponsesFromSupabase() {
-  if (!runtimeConfig.supabaseUrl || !runtimeConfig.supabaseServiceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY or Supabase URL in .env.');
-  }
-  const endpoint = `${runtimeConfig.supabaseUrl}/rest/v1/responses?select=*&order=submitted_at.desc`;
-  const res = await fetch(endpoint, {
-    headers: {
-      apikey: runtimeConfig.supabaseServiceRoleKey,
-      Authorization: `Bearer ${runtimeConfig.supabaseServiceRoleKey}`,
-    },
-  });
-  const body = await res.text();
-  if (!res.ok) {
-    throw new Error(`Supabase export failed: ${res.status} - ${body}`);
-  }
-  return JSON.parse(body);
-}
-
-async function fetchFollowupContactsFromSupabase() {
-  if (!runtimeConfig.supabaseUrl || !runtimeConfig.supabaseServiceRoleKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY or Supabase URL in .env.');
-  }
-  const endpoint = `${runtimeConfig.supabaseUrl}/rest/v1/followup_contacts?select=response_id,pseudonym,email,submitted_at`;
-  const res = await fetch(endpoint, {
-    headers: {
-      apikey: runtimeConfig.supabaseServiceRoleKey,
-      Authorization: `Bearer ${runtimeConfig.supabaseServiceRoleKey}`,
-    },
-  });
-  const body = await res.text();
-  if (!res.ok) {
-    const missingTable = res.status === 404 || body.includes('42P01');
-    if (missingTable) {
-      return [];
-    }
-    throw new Error(`Supabase export failed for followup_contacts: ${res.status} - ${body}`);
-  }
-  return JSON.parse(body);
-}
-
-function mergeFollowupContacts(rows, contacts) {
-  const contactMap = new Map();
-  for (const contact of contacts || []) {
-    const key = String(contact?.response_id || '').trim();
-    if (!key) continue;
-    if (!contactMap.has(key)) {
-      contactMap.set(key, contact);
-    }
-  }
-
-  return (rows || []).map(row => {
-    const contact = contactMap.get(String(row?.id || '').trim());
-    if (!contact) {
-      return {
-        ...row,
-        followup_email: row?.followup_email || '',
-      };
-    }
-    return {
-      ...row,
-      followup_email: row?.followup_email || contact.email || '',
-    };
-  });
-}
-
 function contentTypeFor(filePath) {
   switch (extname(filePath).toLowerCase()) {
     case '.html':
@@ -251,28 +120,6 @@ const requestHandler = async (req, res) => {
   const requestUrl = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const pathname = requestUrl.pathname;
 
-  if (pathname === '/health' || pathname === '/api/health') {
-    return sendJson(res, 200, {
-      ok: true,
-      submitConfigured: Boolean(runtimeConfig.n8nWebhookUrl),
-      exportReady: Boolean(runtimeConfig.supabaseUrl && runtimeConfig.supabaseServiceRoleKey && runtimeConfig.adminExportToken),
-      appMode: runtimeConfig.appMode,
-    });
-  }
-
-  if (pathname === '/js/config.js' || pathname === '/api/config') {
-    const body = `window.CREATECH_CONFIG = ${JSON.stringify({
-      submitEndpoint: '/api/submit',
-      submitConfigured: Boolean(runtimeConfig.n8nWebhookUrl),
-      appMode: runtimeConfig.appMode,
-    }, null, 2)};\n`;
-    res.writeHead(200, {
-      'Content-Type': 'application/javascript; charset=utf-8',
-      'Cache-Control': 'no-store',
-    });
-    return res.end(body);
-  }
-
   if (pathname === '/submit' || pathname === '/api/submit') {
     setCorsHeaders(res);
 
@@ -297,36 +144,6 @@ const requestHandler = async (req, res) => {
         'Access-Control-Allow-Headers': 'Content-Type, X-Webhook-Secret',
       });
       return res.end(forwarded.body);
-    } catch (error) {
-      return sendJson(res, 503, { error: String(error?.message || error) });
-    }
-  }
-
-  if (pathname === '/admin/export' || pathname === '/api/admin-export') {
-    if (!isAuthorizedAdmin(requestUrl, req.headers)) {
-      return sendJson(res, 401, { error: 'Unauthorized export request.' });
-    }
-    try {
-      const rows = await fetchResponsesFromSupabase();
-      const followupContacts = await fetchFollowupContactsFromSupabase();
-      const mergedRows = mergeFollowupContacts(rows, followupContacts);
-      const scope = String(requestUrl.searchParams.get('scope') || 'all').toLowerCase();
-      const filteredRows = scope === 'test'
-        ? mergedRows.filter(isLikelyTestRow)
-        : scope === 'real'
-          ? mergedRows.filter(row => !isLikelyTestRow(row))
-          : mergedRows;
-      const format = String(requestUrl.searchParams.get('format') || 'json').toLowerCase();
-      if (format === 'csv') {
-        const csv = rowsToCsv(filteredRows);
-        res.writeHead(200, {
-          'Content-Type': 'text/csv; charset=utf-8',
-          'Cache-Control': 'no-store',
-          'Content-Disposition': 'attachment; filename="responses.csv"',
-        });
-        return res.end(csv);
-      }
-      return sendJson(res, 200, { count: filteredRows.length, rows: filteredRows });
     } catch (error) {
       return sendJson(res, 503, { error: String(error?.message || error) });
     }
